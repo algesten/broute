@@ -1,6 +1,6 @@
 {
   "name": "broute",
-  "version": "0.0.9",
+  "version": "1.0.0",
   "description": "procedural router",
   "main": "lib/route.js",
   "scripts": {
