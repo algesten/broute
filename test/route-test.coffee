@@ -294,6 +294,28 @@ describe 'route', ->
             eql e2.callCount, 1
             eql e2.args[0], ['em/here', foo:'bar']
 
+        describe 'path else', ->
+
+            it 'executes if path doesnt match', ->
+                correct = false
+                global.window.location = {pathname:'/about', search:''}
+                route ->
+                    path '/item', ->
+                        throw Error()
+                    , ->
+                        correct = true
+                eql correct, true
+
+            it 'doesnt execute if path matches', ->
+                correct = false
+                global.window.location = {pathname:'/item/blah', search:''}
+                route ->
+                    path '/item', ->
+                        correct = true
+                    , ->
+                        throw Error()
+                eql correct, true
+
         describe 'lazynavigate', ->
 
             it 'suspends navigate during route function', ->

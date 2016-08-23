@@ -41,7 +41,12 @@ class Router
         spath = @_path
         sexec = @_exec
         @_exec = (f)    => f sub, query
-        @_path = (p, f) => @_consume loc, pos + p.length, query, f if startswith(sub, p)
+        @_path = (p, f) =>
+            if startswith(sub, p)
+                @_consume loc, pos + p.length, query, f
+                true
+            else
+                false
         try fun() finally (@_path = spath; @_exec = sexec)
         return true
 
@@ -91,7 +96,14 @@ class Router
         router._check()
         return undefined
 
-    path:  (p, f) => @_path? p, f
+    path:  (p, f, fe) =>
+        if @_path?(p, f)
+            true
+        else
+            try
+                fe?()
+            finally
+                false
     exec:  (f)    => @_exec? f
 
 # singleton
