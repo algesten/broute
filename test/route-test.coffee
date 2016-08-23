@@ -1,7 +1,7 @@
 
 describe 'route', ->
 
-    query = router = reinit = route = path = exec = navigate =
+    query = router = reinit = route = path = navigate =
     _lazynavigate = _window = null
 
     beforeEach ->
@@ -16,7 +16,7 @@ describe 'route', ->
                 pushState: spy ->
         {query, reinit} = require '../src/route'
         router = reinit?()
-        {route, path, exec, navigate, _lazynavigate} = router
+        {route, path, navigate, _lazynavigate} = router
 
     afterEach ->
         global.window = _window
@@ -179,13 +179,11 @@ describe 'route', ->
                 _lazynavigate false
                 eql window.history.pushState.callCount, 0
 
-    describe 'route/path/exec', ->
+    describe 'route/path', ->
 
         it 'outside route, nothing', ->
             path '/', r = spy ->
-            exec e = spy ->
             eql r.callCount, 0
-            eql e.callCount, 0
 
         it 'invoke route straight away', ->
             route r = spy()
@@ -199,43 +197,27 @@ describe 'route', ->
             r = path ->
             eql r, undefined
 
-        it 'exec returns undefined outside route', ->
-            r = exec (p, q) -> 42
-            eql r, undefined
-
-        it 'exec returns the result of the executed function inside route', ->
-            route s = spy ->
-                r = exec (p, q) -> 42
-                eql r, 42
-            eql s.callCount, 1
-
         it 'invokes the route set', ->
             r = e = null
             window.location =
                 pathname:'/a/path'
                 search:'?foo=bar'
             route r = spy ->
-                exec e = spy ->
             eql r.callCount, 1
-            eql r.args[0], []
-            eql e.callCount, 1
-            eql e.args[0], ['/a/path', foo:'bar']
+            eql r.args[0], ['/a/path', foo:'bar']
 
         it 'invokes to the end and no more', ->
             s = r1 = r2 = e = null
             # default is "/some/path"
             route s = spy ->
                 path '/a/path', ->
-                    exec e = spy ->
                     path '/', r1 = spy ->
                     path '', r2 = spy ->
             router._run '/a/path', '?foo=bar'
             eql s.callCount, 2
             eql r1.callCount, 0
             eql r2.callCount, 1
-            eql r2.args[0], []
-            eql e.callCount, 1
-            eql e.args[0], ['', foo:'bar']
+            eql r2.args[0], ['', foo:'bar']
 
         it 'path without match does nothing', ->
             r = null
@@ -248,63 +230,52 @@ describe 'route', ->
             route -> path '/item', r = spy ->
             router._run '/item/here', '?foo=bar'
             eql r.callCount, 1
-            eql r.args[0], []
+            eql r.args[0], ['/here', foo:'bar']
 
         it 'path in path consumes the route further', ->
             r = e = null
             route -> path '/item', ->
                 path '/is', r = spy ->
-                    exec e = spy ->
             router._run '/item/is/there', '?foo=bar'
             eql r.callCount, 1
-            eql r.args[0], []
-            eql e.callCount, 1
-            eql e.args[0], ['/there', foo:'bar']
+            eql r.args[0], ['/there', foo:'bar']
 
         it 'path on the same level can match again', ->
-            r = e1 = e2 = null
+            r1 = r2 = null
             route ->
-                path '/item', ->
-                    exec e1 = spy ->
-                path '/it', r = spy ->
-                    exec e2 = spy ->
+                path '/item', r1 = spy ->
+                path '/it', r2 = spy ->
             router._run '/item/here', '?foo=bar'
-            eql r.callCount, 1
-            eql r.args[0], []
-            eql e1.callCount, 1
-            eql e1.args[0], ['/here', foo:'bar']
-            eql e2.callCount, 1
-            eql e2.args[0], ['em/here', foo:'bar']
+            eql r1.callCount, 1
+            eql r1.args[0], ['/here', foo:'bar']
+            eql r2.callCount, 1
+            eql r2.args[0], ['em/here', foo:'bar']
 
         it 'path on the same level can match again after path in path', ->
             r1 = r2 = e1 = e2 = null
             route ->
                 path '/item', ->
                     path '/he', r1 = spy ->
-                        exec e1 = spy ->
                 path '/it', r2 = spy ->
-                    exec e2 = spy ->
             router._run '/item/here', '?foo=bar'
             eql r1.callCount, 1
-            eql r1.args[0], []
+            eql r1.args[0], ['re', foo:'bar']
             eql r2.callCount, 1
-            eql r2.args[0], []
-            eql e1.callCount, 1
-            eql e1.args[0], ['re', foo:'bar']
-            eql e2.callCount, 1
-            eql e2.args[0], ['em/here', foo:'bar']
+            eql r2.args[0], ['em/here', foo:'bar']
 
         describe 'path else', ->
 
             it 'executes if path doesnt match', ->
                 correct = false
+                r = null
                 global.window.location = {pathname:'/about', search:''}
                 route ->
                     path '/item', ->
                         throw Error()
-                    , ->
+                    , r = spy ->
                         correct = true
                 eql correct, true
+                eql r.args[0], ['/about', {}]
 
             it 'doesnt execute if path matches', ->
                 correct = false
@@ -313,30 +284,6 @@ describe 'route', ->
                     path '/item', ->
                         correct = true
                     , ->
-                        throw Error()
-                eql correct, true
-
-        describe 'exec else', ->
-
-            it 'executes the else if falsy', ->
-                correct = false
-                global.window.location = {pathname:'/item/blah', search:''}
-                route ->
-                    exec (p) ->
-                        ''
-                    , (p) ->
-                        eql p, '/item/blah'
-                        correct = true
-                eql correct, true
-
-            it 'executes the else if truthy', ->
-                correct = false
-                global.window.location = {pathname:'/item/blah', search:''}
-                route ->
-                    exec (p) ->
-                        correct = true
-                        'blah'
-                    , (p) ->
                         throw Error()
                 eql correct, true
 

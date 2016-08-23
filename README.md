@@ -1,7 +1,7 @@
 # broute - brutal router
 
 ```javascript
-import {route, path, exec, navigate} from 'broute'
+import {route, path, navigate} from 'broute'
 ```
 
 #### route
@@ -10,8 +10,7 @@ import {route, path, exec, navigate} from 'broute'
 
 Declares the route function `f` which will be invoked each time the
 url changes. There can only be one such function. The url is
-"consumed" and "executed" using nested scoped
-[`path`](#path)/[`exec`](#exec) functions.
+"consumed" using nested scoped [`path`](#path) functions.
 
 `:: (() ->) -> undefined`
 
@@ -30,24 +29,15 @@ The following usage shows how nested `path` declarations creates
 
 route(() => {
 
-    path('/some', () => {
+    path('/some', (left, query) => {
         // at this point we "consumed" '/some'
-        exec((part, query) => {
-            // part is '/path'
-            // query is {panda:42}
-        })
-        path('/deep', () => {
-            exec((part, query) => {
-                // part is ''
-                // query is {panda:42}
-            })
+        // and left is "/path/deep"
+        // and query is {panda:42}
+        path('/path/deep', (left, query) => {
+          // left is "" and query is {panda:42}
         })
     })
     // at this point we haven't consumed anything
-    exec((part, query) => {
-        // part is '/some/path'
-        // query is {panda:42}
-    })
     path('/another', () => {
         // will not be invoked for the current url
     })
@@ -61,14 +51,10 @@ isItem = (part, query) => part?.length > 1        // '' means list
 
 route(() => {
 
-    path('/news/', () => {                        // consume '/news/'
-        if (exec isItem) {                        // test if this is a news item
-            exec((slugid) => {                    // use exec to get slugid from scoped path
-                action('selectarticle', slugid)   // fire action to fetch article
-            })
-        } else {
-            action('refreshnewslist')
-        }
+    path('/news/', (slugId) => {                  // consume '/news/'
+        action('selectarticle', slugid)           // fire action to fetch article
+    }, () => {
+        action('refreshnewslist')                 // else refresh news list
     })
     path('/aboutus', () => {                      // consume '/aboutus'
         action('showaboutus')
@@ -78,7 +64,7 @@ route(() => {
 
 #### path
 
-`path(p,f)`
+`path(p,f,fe)`
 
 As part of [`route`](#route) declares a function `f` that is invoked
 if we "consume" url part `p` of the current (scoped) url.
@@ -87,25 +73,9 @@ arg | desc
 :---|:----
 p   | The string url part to match/consume.
 f   | Function to invoke when url part matches.
-ret | Always `undefined`
+fe  | Optional else function if url part doesn't match.
 
 ##### path example
-
-See [route usage](#route-usage) and [route example](#route-example).
-
-#### exec
-
-`exec(f)`
-
-As part of [`route`](#route) executes `f` with arguments
-`(part,query)` for the current path scope.
-
-arg | desc
-:---|:----
-f   | Function to invoke with `(part,query)`
-ret | The result of the executed function.
-
-##### exec example
 
 See [route usage](#route-usage) and [route example](#route-example).
 

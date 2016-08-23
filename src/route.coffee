@@ -29,8 +29,7 @@ class Router
 
     loc:   null  # saved location for comparison in _check()
     _route: ->   # saved route function
-    _path:  null # path function replaced for every _consume
-    _exec:  null # exec function replaced for every _consume
+    _path: null  # path function replaced for every _consume
 
     constructor: (@win) ->
         @win.addEventListener 'onpopstate', @_check, false
@@ -39,16 +38,20 @@ class Router
     _consume: (loc, pos, query, fun) =>
         sub = loc.substring pos
         spath = @_path
-        sexec = @_exec
-        @_exec = (f) => f?(sub, query)
-        @_path = (p, f) =>
+        @_path = (p, f, fe) =>
             if startswith(sub, p)
                 @_consume loc, pos + p.length, query, f
                 true
             else
+                fe?(sub, query)
                 false
-        try fun() finally (@_path = spath; @_exec = sexec)
-        return true
+        try
+            if fun(sub, query)
+                return true
+            else
+                return false
+        finally
+            @_path = spath
 
     _check: =>
         {pathname, search} = @win.location
@@ -96,22 +99,7 @@ class Router
         router._check()
         return undefined
 
-    path:  (p, f, fe) =>
-        if @_path?(p, f)
-            true
-        else
-            try
-                fe?()
-            finally
-                false
-    exec:  (f, fe) =>
-        if ret = @_exec?(f)
-            ret
-        else
-            try
-                @_exec?(fe)
-            finally
-                false
+    path:  (p, f, fe) => @_path?(p, f, fe)
 
 # singleton
 router = null
@@ -119,7 +107,7 @@ do init = ->
     `router = new Router(window)`
 
 module.exports = {
-    route:router.route, path:router.path, exec:router.exec, navigate:router.navigate,
+    route:router.route, path:router.path, navigate:router.navigate,
     _lazynavigate:router._lazynavigate
 }
 
