@@ -316,6 +316,30 @@ describe 'route', ->
                         throw Error()
                 eql correct, true
 
+        describe 'exec else', ->
+
+            it 'executes the else if falsy', ->
+                correct = false
+                global.window.location = {pathname:'/item/blah', search:''}
+                route ->
+                    exec (p) ->
+                        ''
+                    , (p) ->
+                        eql p, '/item/blah'
+                        correct = true
+                eql correct, true
+
+            it 'executes the else if truthy', ->
+                correct = false
+                global.window.location = {pathname:'/item/blah', search:''}
+                route ->
+                    exec (p) ->
+                        correct = true
+                        'blah'
+                    , (p) ->
+                        throw Error()
+                eql correct, true
+
         describe 'lazynavigate', ->
 
             it 'suspends navigate during route function', ->

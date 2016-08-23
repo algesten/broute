@@ -40,7 +40,7 @@ class Router
         sub = loc.substring pos
         spath = @_path
         sexec = @_exec
-        @_exec = (f)    => f sub, query
+        @_exec = (f) => f?(sub, query)
         @_path = (p, f) =>
             if startswith(sub, p)
                 @_consume loc, pos + p.length, query, f
@@ -104,7 +104,14 @@ class Router
                 fe?()
             finally
                 false
-    exec:  (f)    => @_exec? f
+    exec:  (f, fe) =>
+        if ret = @_exec?(f)
+            ret
+        else
+            try
+                @_exec?(fe)
+            finally
+                false
 
 # singleton
 router = null
