@@ -32,7 +32,7 @@ class Router
     _path: null  # path function replaced for every _consume
 
     constructor: (@win) ->
-        @win.addEventListener 'onpopstate', @_check, false
+        @win.addEventListener 'popstate', @_check, false
         @loc = {}
 
     _consume: (loc, pos, query, fun) =>
