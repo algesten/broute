@@ -1,5 +1,7 @@
 # broute - brutal router
 
+[![Build Status](https://travis-ci.org/algesten/broute.svg?branch=master)](https://travis-ci.org/algesten/broute)
+
 ```javascript
 import {route, path, navigate} from 'broute'
 ```
