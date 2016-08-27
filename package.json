@@ -4,7 +4,7 @@
   "description": "procedural router",
   "main": "lib/route.js",
   "scripts": {
-    "test": "mocha -R tap",
+    "test": "mocha",
     "prepublish": "coffee -o lib -c src"
   },
   "repository": {
