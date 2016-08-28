@@ -3,26 +3,7 @@ builtin    = I.bind.bind I.call
 startswith = (s, i) -> s.slice(0, i.length) == i
 indexof    = builtin String::indexOf
 
-replaceplus = (s) -> s.replace /\+/g, ' '
-decode      = (s) -> decodeURIComponent replaceplus s
-
-# turns a search string ?a=b into an object {a:'b'}
-query = (s, ret = {}) ->
-    unless s # null, undefined, false, ''
-        ret
-    else if s[0] == '&'
-        query s[1..], ret
-    else
-        [m, key, val] = s.match(/([^&=]+)=?([^&]*)/) || ['']
-        if key
-            dkey = decode key
-            dval = decode val
-            if (prev = ret[dkey])?
-                arr = if Array.isArray(prev) then prev else ret[dkey] = [prev]
-                arr.push decode(val)
-            else
-                ret[dkey] = dval
-        query s.substring(m.length + 1), ret
+query = require './query'
 
 # encapsulates the router functions
 class Router
@@ -35,18 +16,18 @@ class Router
         @win.addEventListener 'popstate', @_check, false
         @loc = {}
 
-    _consume: (loc, pos, query, fun) =>
+    _consume: (loc, pos, qu, fun) =>
         sub = loc.substring pos
         spath = @_path
         @_path = (p, f, fe) =>
             if startswith(sub, p)
-                @_consume loc, pos + p.length, query, f
+                @_consume loc, pos + p.length, qu, f
                 true
             else
-                fe?(sub, query)
+                fe?(sub, qu)
                 false
         try
-            if fun(sub, query)
+            if fun(sub, qu)
                 return true
             else
                 return false
