@@ -6,7 +6,7 @@ decode      = (s) -> decodeURIComponent replaceplus s
 module.exports = query = (s, ret = {}) ->
     unless s # null, undefined, false, ''
         ret
-    else if s[0] == '&'
+    else if s[0] in ['?', '&']
         query s[1..], ret
     else
         [m, key, val] = s.match(/([^&=]+)=?([^&]*)/) || ['']

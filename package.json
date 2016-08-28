@@ -34,5 +34,8 @@
     "sinon": "^1.17",
     "sinon-chai": "^2.6",
     "uglify-js": "^2.5"
+  },
+  "dependencies": {
+    "global": "^4.3.0"
   }
 }
