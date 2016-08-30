@@ -3,25 +3,45 @@
 [![Build Status](https://travis-ci.org/algesten/broute.svg?branch=master)](https://travis-ci.org/algesten/broute)
 
 ```javascript
-import {route, path, navigate} from 'broute'
+import {path, navigate} from 'broute'
 ```
 
-#### route
+## path
 
-`route(f)`
+`path(f)`  
+`path(p,f)`  
+`path(p,f,fe)`
 
-Declares the route function `f` which will be invoked each time the
-url changes. There can only be one such function. The url is
-"consumed" using nested scoped [`path`](#path) functions.
+Tests the given part fragment `p` and if current path matches,
+consumes the fragment and invokes function `f`. If not match, no
+consume and invoke optional function `fe`.
 
-`:: (() ->) -> undefined`
+* `p` - path fragment to match from current scope
+* `f` - function to invoke if fragment matches
+* `fe` - optional "else" function to invoke if fragment doesnt match
+* return - the result of `f` or `fe`
 
-arg | desc
-:---|:----
-f   | The one and only route function.
-ret | Always `undefined`
+### function args
 
-##### route usage
+The `f` or `fe` is invoked with `(left, query)`. The first is the path
+that is left after the `p` fragment has been consumed (not for `fe`).
+
+* `left` - the path that is left after consuming fragment `p`
+* `search` - the search parameters as object `?a=b` becomes `{a:'b'}`
+
+### root 
+
+On the root level, we can use path without a string arg. This is the
+starting point of the route function that is invoked for every url
+change. There can only be one root level path installed for each router.
+
+```
+path(() => {
+
+})
+```
+
+#### path usage
 
 The following usage shows how nested `path` declarations creates
 "scoped" functions that consumes part of the current url.
@@ -29,7 +49,7 @@ The following usage shows how nested `path` declarations creates
 ```javascript
 // the current url is: "/some/path/deep?panda=42"
 
-route(() => {
+path(() => {
 
     path('/some', (left, query) => {
         // at this point we "consumed" '/some'
@@ -46,12 +66,10 @@ route(() => {
 })
 ```
 
-##### route example
+#### path example 2
 
 ```javascript
-isItem = (part, query) => part?.length > 1        // '' means list
-
-route(() => {
+path(() => {
 
     path('/news/', (slugId) => {                  // consume '/news/'
         action('selectarticle', slugid)           // fire action to fetch article
@@ -64,60 +82,42 @@ route(() => {
 })
 ```
 
-#### path
+## navigate
 
-`path(p,f,fe)`
-
-As part of [`route`](#route) declares a function `f` that is invoked
-if we "consume" url part `p` of the current (scoped) url.
-
-arg | desc
-:---|:----
-p   | The string url part to match/consume.
-f   | Function to invoke when url part matches.
-fe  | Optional else function if url part doesn't match.
-
-##### path example
-
-See [route usage](#route-usage) and [route example](#route-example).
-
-#### navigate
-
-`navigate(l)`
-`navigate(l, false)`
+`navigate(l)`  
 
 Navigates to the location `l` using [pushState][push] and checks to
-see if the url changed in which case the [route function](#route) is
-executed.
+see if the url changed in which case the [path function](#path) is
+invoked. 
 
-The function takes an optional second boolean argument that can be
-used to supress the execution of the route function.
+* `l` - location to set. example `/my/page?foo=42`
 
-This function is lazy when used inside [route](#route), only the last
-location will be used when the route function finishes.
-
-`:: string -> undefined`
-`:: string, boolean -> undefined`
-
-arg | desc
-:---|:----
-l   | The (string) location to navigate to. Can be relative.
-t   | Optional boolean set to false to supress route function triggering.
-ret | always `undefined`
-
-##### navigate example
+#### navigate example
 
 ```javascript
 // if browser is at "http://my.host/some/where"
 
 navigate('other')   // changes url to "http://my.host/some/other"
 navigate('/news')   // changes url to "http://my.host/news"
-
-
-navigate('/didnt', false) // changes url to "http://my.host/didnt"
-                          // without running the route function
 ```
 
+### lazy
+
+`navigate` is lazy when used inside a path. in this example, only `/a`
+and `/c` would be run. Furthermore the invocation of `/c` only happens
+at the end of the root path function.
+
+```javascript
+path(() => {
+    navigate("/b")
+    navigate("/c")
+    if (someCondition()) {
+        ... // more code
+    }
+    // conceptually navigate("/c") happens here
+})  
+navigate("/a")
+```
 
 License
 -------
