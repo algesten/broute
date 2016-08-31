@@ -2,7 +2,7 @@
   "name": "broute",
   "version": "1.2.1",
   "description": "procedural router",
-  "main": "lib/route.js",
+  "main": "lib/router.js",
   "scripts": {
     "test": "mocha",
     "prepublish": "coffee -o lib -c src"
