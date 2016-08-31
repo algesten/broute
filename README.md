@@ -135,8 +135,8 @@ import router from 'broute'         // router function
 
 If the `window` argument has an `addEventListener` function, a
 listener will be added for [`popstate`][popstate] events. This means
-broute will run the path function for each invocation of
-[`window.history.pushState`][push] also when not used via `navigate`.
+broute will run the path function also for the back button as well as
+via `navigate`.
 
 On each `popstate` or `navigate` invocation, the `window` argument
 is inspected for a property `window.location` which is expected to
@@ -152,7 +152,7 @@ hold an object:
 If this object changes on `navigate` or `popstate`, the path function
 is run.
 
-If `window` doesn't have a `window.history.pushState` function, `navigate`
+If the `window` doesn't have a `window.history.pushState` function, `navigate`
 will fall back on manipulating `window.location` directly.
 
 

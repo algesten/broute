@@ -68,7 +68,7 @@ router = (win) ->
             else
                 [_, pathname, search] = p?.match(/([^?]*)(\?.*)?/) ? []
                 win.location = {pathname:(pathname ? ''), search:(search ? '')}
-                docheck()
+            docheck()
 
     # create a checker around the window
     docheck = mkdocheck win, (path, search) -> run path, search
