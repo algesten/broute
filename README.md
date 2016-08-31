@@ -119,6 +119,43 @@ path(() => {
 navigate("/a")
 ```
 
+## Creating routers
+
+For advanced usages, new routers can be created around arbitrary
+"window" objects.
+
+Conceptually broute does this for the default `path` and `navigate`
+functions around a current global `window` variable:
+
+```javascript
+import router from 'broute'         // router function
+
+{path, navigate} = router(window)  // create a router around window
+```
+
+If the `window` argument has an `addEventListener` function, a
+listener will be added for [`popstate`][popstate] events. This means
+broute will run the path function for each invocation of
+[`window.history.pushState`][push] also when not used via `navigate`.
+
+On each `popstate` or `navigate` invocation, the `window` argument
+is inspected for a property `window.location` which is expected to
+hold an object:
+
+```
+{
+  pathname: "/current/path", 
+  search:   "?my=query"
+}
+```
+
+If this object changes on `navigate` or `popstate`, the path function
+is run.
+
+If `window` doesn't have a `window.history.pushState` function, `navigate`
+will fall back on manipulating `window.location` directly.
+
+
 License
 -------
 
@@ -146,3 +183,4 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 [push]: https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history#The_pushState()_method
+[popstate]: https://developer.mozilla.org/en-US/docs/Web/Events/popstate
