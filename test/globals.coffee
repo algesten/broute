@@ -6,3 +6,4 @@ sinon  = require 'sinon'
 global.stub = sinon.stub
 global.spy  = sinon.spy
 global.sandbox = sinon.sandbox
+global.match = sinon.match

@@ -3,13 +3,27 @@ router = require '../src/router'
 
 describe 'router', ->
 
-    it 'blows up if not object', ->
-        assert.throws router, 'router must be created around an object'
-
     path = navigate = win = null
     beforeEach ->
         win = {}
         {path, navigate} = router(win)
+
+    it 'blows up if not object', ->
+        assert.throws router, 'router must be created around an object'
+
+    it 'adds an event listener if addEventListener is there', ->
+        win = {addEventListener: spy ->}
+        {path, navigate} = router(win)
+        assert win.addEventListener.calledWith 'popstate', match.func
+
+    it 'runs the path function on popstate', ->
+        win = {addEventListener: spy ->}
+        {path} = router(win)
+        path s = spy ->
+        win.location = pathname:'/a'
+        eql s.args, []
+        win.addEventListener.args[0][1]() # invoke 'popstate' listener
+        eql s.args, [['/a',{}]]
 
     describe 'navigate', ->
 
@@ -24,6 +38,12 @@ describe 'router', ->
             it "updates win.location for #{t[0]}", ->
                 navigate t[0]
                 eql win, location:{pathname:t[1], search:t[2]}
+
+        it 'uses pushState if available', ->
+            win = {history:pushState:spy ->}
+            {navigate} = router(win)
+            navigate '/yo'
+            eql win.history.pushState.args, [[{}, null, '/yo']]
 
         it 'is lazy in path', ->
             path p = spy ->
