@@ -163,3 +163,7 @@ describe 'router', ->
             path -> r 2
             navigate '/blah'
             eql r.args, [[2]]
+
+        it 'returns navigate on root path', ->
+            n = path ->
+            assert n == navigate

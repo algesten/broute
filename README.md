@@ -42,6 +42,8 @@ path(() => {
 navigate() // run route on startup
 ```
 
+The root level path returns the navigate function. `path(() => {...})('/start')`
+
 #### path usage
 
 The following usage shows how nested `path` declarations creates
@@ -81,8 +83,7 @@ path(() => {
     path('/aboutus', () => {                      // consume '/aboutus'
         action('showaboutus')
     })
-})
-navigate() // run first route
+})() // run first route
 ```
 
 ## navigate

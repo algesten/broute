@@ -53,6 +53,7 @@ router = (win) ->
         run = lazy mkproxy frag, fn, fne
         # create a checker around the window
         docheck = mkdocheck win, run
+        navigate # root level returns the navigate function
 
     # exposed path function which is proxying into mkrun
     path = (frag, fn, fne) ->
