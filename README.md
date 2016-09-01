@@ -39,6 +39,7 @@ change. There can only be one root level path installed for each router.
 path(() => {
 
 })
+navigate() // run route on startup
 ```
 
 #### path usage
@@ -64,6 +65,7 @@ path(() => {
         // will not be invoked for the current url
     })
 })
+navigate() // run first route
 ```
 
 #### path example 2
@@ -80,17 +82,24 @@ path(() => {
         action('showaboutus')
     })
 })
+navigate() // run first route
 ```
 
 ## navigate
 
 `navigate(l)`  
+`navigate()`
 
 Navigates to the location `l` using [pushState][push] and checks to
 see if the url changed in which case the [path function](#path) is
 invoked. 
 
-* `l` - location to set. example `/my/page?foo=42`
+* `l` - location to set. example `/my/page?foo=42`.
+
+Navigate with no argument is used to trigger a check of the current
+path in the `window.location` object. It's typically only used on
+startup or to detect path changes due to [`pushState`][push] without
+using navigate.
 
 #### navigate example
 

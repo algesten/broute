@@ -9,16 +9,17 @@ mkdocheck = (win, listener) ->
 
     getloc = ->
         l = win?.location ? {}
-        {pathname:l.pathname ? '', search:query l.search ? ''}
+        {pathname:l.pathname ? '', search:l.search ? ''}
 
-    # the current location
-    loc = Object.assign {}, getloc()
+    # the current location. starting
+    # values that definitely will trigger
+    loc = {pathname:null, search:null}
 
     ->
         next = getloc()
         if loc.pathname != next.pathname or loc.search != next.search
             loc = next
-            listener(loc.pathname, loc.search)
+            listener(loc.pathname, query loc.search)
 
 
 router = (win) ->
@@ -26,7 +27,7 @@ router = (win) ->
     throw new Error("router must be created around an object") unless isplain(win)
 
     # hoist
-    run = proxy = ->
+    run = proxy = docheck = ->
 
     # make a proxy that in turn produces a run function
     mkproxy = (frag, fn, fne) -> (path, search) ->
@@ -47,7 +48,11 @@ router = (win) ->
             proxy = _proxy
 
     # root level proxy just overwrites the starting point
-    proxy = (frag, fn, fne) -> run = lazy mkproxy frag, fn, fne
+    proxy = (frag, fn, fne) ->
+        # root level run function
+        run = lazy mkproxy frag, fn, fne
+        # create a checker around the window
+        docheck = mkdocheck win, run
 
     # exposed path function which is proxying into mkrun
     path = (frag, fn, fne) ->
@@ -63,18 +68,16 @@ router = (win) ->
     navigate = do ->
         ispush = isfun win?.history?.pushState
         (p) ->
-            if ispush
-                win.history.pushState {}, null, p
-            else
-                [_, pathname, search] = p?.match(/([^?]*)(\?.*)?/) ? []
-                win.location = {pathname:(pathname ? ''), search:(search ? '')}
+            if arguments.length
+                if ispush
+                    win.history.pushState {}, null, p
+                else
+                    [_, pathname, search] = p?.match(/([^?]*)(\?.*)?/) ? []
+                    win.location = {pathname:(pathname ? ''), search:(search ? '')}
             docheck()
 
-    # create a checker around the window
-    docheck = mkdocheck win, (path, search) -> run path, search
-
     # when window changes state
-    win?.addEventListener? 'popstate', docheck
+    win?.addEventListener? 'popstate', -> docheck()
 
     {path, navigate}
 

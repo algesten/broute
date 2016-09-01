@@ -56,6 +56,33 @@ describe 'router', ->
             navigate 'a'
             eql p.args, [['a',{}],['c',{}],['e',{}]]
 
+        it 'doesnt fire if path is exactly the same', ->
+            path s = spy ->
+            eql s.args, []
+            navigate('/blah?foo=bar')
+            eql s.args, [['/blah', foo:'bar']]
+            navigate('/blah?foo=bar') # do nothing
+            eql s.args, [['/blah', foo:'bar']]
+
+        it 'runs current location if invoked without arguments', ->
+            {path, navigate} = router(location:{pathname:'/panda', search:'?bear=true'})
+            path s = spy ->
+            eql s.args, []
+            navigate()
+            eql s.args, [['/panda', bear:'true']]
+            navigate() # should do nothing
+            eql s.args, [['/panda', bear:'true']]
+
+        it 'runs current location again if new root installed', ->
+            {path, navigate} = router(location:{pathname:'/panda', search:'?bear=true'})
+            path s1 = spy ->
+            navigate()
+            eql s1.args, [['/panda', bear:'true']]
+            path s2 = spy ->
+            navigate()
+            eql s1.args, [['/panda', bear:'true']]
+            eql s2.args, [['/panda', bear:'true']]
+
     describe 'path', ->
 
         level1 = level2a = level2b = null
