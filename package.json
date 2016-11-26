@@ -29,13 +29,13 @@
   "homepage": "https://github.com/algesten/broute",
   "devDependencies": {
     "chai": "^3.4",
-    "coffee-script": "1.10.0",
-    "mocha": "^3.0",
+    "coffee-script": "^1",
+    "mocha": "^3",
     "sinon": "^1.17",
     "sinon-chai": "^2.6",
-    "uglify-js": "^2.5"
+    "uglify-js": "^2.7"
   },
   "dependencies": {
-    "global": "^4.3.0"
+    "global": "^4"
   }
 }
