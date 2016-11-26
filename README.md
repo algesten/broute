@@ -21,6 +21,12 @@ consume and invoke optional function `fe`.
 * `fe` - optional "else" function to invoke if fragment doesnt match
 * return - the result of `f` or `fe`
 
+## vararg paths to test
+
+`path(p1,f1,p2,f2,...,pn,fn,fe)`
+
+Any number of paths can be tested and the first one that matches is run.
+
 ### function args
 
 The `f` or `fe` is invoked with `(left, query)`. The first is the path
