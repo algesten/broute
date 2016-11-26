@@ -167,3 +167,30 @@ describe 'router', ->
         it 'returns navigate on root path', ->
             n = path ->
             assert n == navigate
+
+    describe 'path s1, fn1, s2, f2, fn3', ->
+
+        fn1 = fn2 = fne = null
+        beforeEach ->
+            fn1 = spy()
+            fn2 = spy()
+            fne = spy()
+            path '/ny', fn1, '/n', fn2, fne
+
+        it 'runs the first for /ny/blah', ->
+            navigate '/ny/blah'
+            eql fn1.args, [['/blah', {}]]
+            eql fn2.args, []
+            eql fne.args, []
+
+        it 'runs the second for /nblah', ->
+            navigate '/nblah'
+            eql fn1.args, []
+            eql fn2.args, [['blah', {}]]
+            eql fne.args, []
+
+        it 'runs else for /blah', ->
+            navigate '/blah'
+            eql fn1.args, []
+            eql fn2.args, []
+            eql fne.args, [['/blah', {}]]
