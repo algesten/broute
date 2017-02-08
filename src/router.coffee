@@ -16,12 +16,17 @@ mkdocheck = (win, listener) ->
     # values that definitely will trigger
     loc = {pathname:null, search:null}
 
-    ->
+    docheck = ->
         next = getloc()
         if loc.pathname != next.pathname or loc.search != next.search
             loc = next
             listener(loc.pathname, query loc.search)
 
+    # expose method to just update state
+    docheck.update = -> loc = getloc()
+
+    # the actual function
+    docheck
 
 router = (win) ->
 
@@ -89,14 +94,19 @@ router = (win) ->
     # navigate function either working with pushState or win.location
     navigate = do ->
         ispush = isfun win?.history?.pushState
-        (p) ->
+        (p, trigger=true) ->
             if arguments.length
                 if ispush
                     win.history.pushState {}, null, p
                 else
                     [_, pathname, search] = p?.match(/([^?]*)(\?.*)?/) ? []
                     win.location = {pathname:(pathname ? ''), search:(search ? '')}
-            docheck()
+            if trigger
+                # run full check
+                docheck()
+            else
+                # just ensure state is updated
+                docheck.update()
 
     # when window changes state
     win?.addEventListener? 'popstate', -> docheck()

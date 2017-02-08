@@ -83,6 +83,17 @@ describe 'router', ->
             eql s1.args, [['/panda', bear:'true']]
             eql s2.args, [['/panda', bear:'true']]
 
+        it 'doesnt fire if trigger is false', ->
+            path s = spy ->
+            eql s.args, []
+            navigate('/blah?foo=bar', false)
+            eql s.args, []
+            eql win, location:{pathname:'/blah', search:'?foo=bar'}
+            navigate()
+            eql s.args, []
+            eql win, location:{pathname:'/blah', search:'?foo=bar'}
+
+
     describe 'path', ->
 
         level1 = level2a = level2b = null

@@ -94,6 +94,7 @@ path(() => {
 
 ## navigate
 
+`navigate(l,trigger)`  
 `navigate(l)`  
 `navigate()`
 
@@ -102,6 +103,7 @@ see if the url changed in which case the [path function](#path) is
 invoked. 
 
 * `l` - location to set. example `/my/page?foo=42`.
+* `trigger` - whether to trigger the route. defaults to `true`.
 
 Navigate with no argument is used to trigger a check of the current
 path in the `window.location` object. It's typically only used on
